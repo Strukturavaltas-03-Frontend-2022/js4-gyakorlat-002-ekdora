@@ -24,7 +24,7 @@ function ajaxRequest({
    * @param {string} message - the error message
    */
   function handleError(message) {
-
+    console.error(message);
   }
 
   /**
@@ -32,14 +32,27 @@ function ajaxRequest({
    * @param {Object} xhr - the error message
    */
   function handleLoad(xhr) {
-
+    /*
+      onerror fires when there is a failure on the network level.
+      If the error only exists on the application level,
+      e.g., an HTTP error code is sent, then onload still fires
+    */
+    if (xhr.readyState === 4 && xhr.status === 200) {
+      successCallback(JSON.parse(xhr.responseText));
+    } else if (xhr.status === 404) {
+      handleError('Nem található');
+    }
   }
 
   /**
    * Send ajax request
    */
   function request() {
-
+    const xhr = new XMLHttpRequest();
+    xhr.open(method, url, true);
+    xhr.onload = () => handleLoad(xhr);
+    xhr.onerror = (err) => handleError(err.message);
+    xhr.send();
   }
 
   return request;
